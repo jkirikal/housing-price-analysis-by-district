@@ -16,31 +16,22 @@ import csv
 os.environ['PATH'] = f'{os.environ["PATH"]};C:\\Webdrivers\\'
 driver = webdriver.Firefox()
 driver.get("https://www.kv.ee/et/hinnastatistika")
-button = WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[id='onetrust-reject-all-handler']"))).click()
+button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[id='onetrust-reject-all-handler']"))).click()
 sleep(1)
     
-def create_url(startyear, startmonth, endyear, endmonth,county, parish,firstcity,secondcity):
-    url = f"""https://www.kv.ee/et/hinnastatistika?
-                graph_version=2&show_compare_line=1&deal_type=1&
-                start_year={startyear}&start_month={startmonth}&end_year={endyear}&end_month={endmonth}&
-                county1={county}&parish1={parish}&city1={firstcity}&county2={county}&parish2={parish}&city2={secondcity}&
-                graph_version=2&show_compare_line=1&deal_type=1&start_year={startyear}&
-                start_month={startmonth}&end_year={endyear}&end_month={endmonth}&county1={county}&parish1={parish}&
-                city1={firstcity}&county2={county}&parish2={parish}&city2={secondcity}&graph_version=2&
-                show_compare_line=1&deal_type=1&start_year={startyear}&start_month={startmonth}&
-                end_year={endyear}&end_month={endmonth}&county1={county}&parish1={parish}&city1={firstcity}&county2={county}&
-                parish2={parish}&city2={secondcity}"""
+def create_url(startyear, startmonth, endyear, endmonth,county, parish,city):
+    url = f"https://www.kv.ee/et/hinnastatistika?graph_version=2&show_compare_line=1&deal_type=1&start_year={startyear}&start_month={startmonth}&end_year={endyear}&end_month={endmonth}&county1={county}&parish1={parish}&city1={city}&county2={county}&parish2={parish}&city2={city}"
     return url
 
-def get_data(url,driver,first_occasion,previous_data,city,district1,district2):
+def get_data(url,driver,previous_data,city,district):
     driver.get(url)
     sleep(2)
     r = driver.page_source
     soup = BeautifulSoup(r, 'html.parser')
     table = soup.find("table", class_="table-striped")
     
-    if first_occasion:
-        data_headers = ["date",f"price-{city}-{district1}",f"Advertisements-{city}-{district1}",f"Actives-{city}-{district1}",f"price-{city}-{district2}",f"Advertisements-{city}-{district2}",f"Actives-{city}-{district2}"]
+    if len(previous_data)<1:
+        data_headers = ["date",f"price-{city}-{district}",f"Advertisements-{city}-{district}",f"Actives-{city}-{district}"]
         previous_data.append(data_headers)
         rows = table.find_all('tr')
         for row in rows:
@@ -50,9 +41,11 @@ def get_data(url,driver,first_occasion,previous_data,city,district1,district2):
             previous_data.append(cols)
         
     else:
-        data_headers = [f"price-{city}-{district1}",f"Advertisements-{city}-{district1}",f"Actives-{city}-{district1}",f"price-{city}-{district2}",f"Advertisements-{city}-{district2}",f"Actives-{city}-{district2}"]
+        data_headers = [f"price-{city}-{district}",f"Advertisements-{city}-{district}",f"Actives-{city}-{district}"]
         previous_data[0].extend(data_headers)
         rows = table.find_all('tr')
+        x = False
+        if len(rows) != 199: x = True
         for row in range(len(rows)):
             cols = rows[row].find_all('td')
             cols = [col.text for col in cols]
@@ -60,7 +53,9 @@ def get_data(url,driver,first_occasion,previous_data,city,district1,district2):
             try:
                 previous_data[row].extend(cols[1:])
             except:
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!", cols)
+                pass
+        if x:
+            print(url)
     return previous_data
 
 counties = {"harjumaa":1,"tartumaa":12}
@@ -70,7 +65,7 @@ endyear = 2023
 startmonth = 5
 endmonth = 11
 tlncities = {"Tallinn":0,"Haabersti":1001,"Kesklinn":1003,"Kristiine":1004,"Lasnamäe":1006,"Mustamäe":1007,"Nõmme":1008,"Pirita":1010,"Põhja-Tallinn":1011,"Vanalinn":5700,"Kadriorg":5701}
-trtcities = {"Tartu":0,"Haage":1335,"Ilmatsalu küla":1530,"Ilmatsalu alevik":1531,"Kandiküla":1857,"Kardla":1887,"Märja":3317,"Pihva":3760,"Rahinge":4058,"Rõhu":4288,"Tartu linn":4820,
+trtcities = {"Tartu":0,"Haage":1334,"Ilmatsalu küla":1530,"Ilmatsalu alevik":1531,"Kandiküla":1857,"Kardla":1887,"Märja":3317,"Pihva":3760,"Rahinge":4058,"Rõhu":4288,"Tartu linn":4820,
              "Tähtvere":5036,"Tüki":5053,"Vorbuse":5515,"Maarjamõisa":5702,"Raadi-Kruusamäe":5703,"Karlova":5704,"Kesklinn":5705,"Ihaste":5706,"Jaamamõisa":5707,"Annelinn":5708,"Veeriku":5709,
              "Ülejõe":5710,"Vaksali":5711,"Variku":5712,"Tammelinn":5713,"Tähtvere":5714,"Ränilinn":5715,"Supilinn":5716,"Ropka":5717,"Ropka tööstusrajoon":5718}
 firstcity = ""
@@ -80,35 +75,15 @@ secondcity = ""
 indx = 0
 data = []
 for tln in tlncities.keys():
-    if indx % 2 == 0:
-        firstcity = tln
-        if tln == "Kadriorg":
-            url = create_url(startyear, startmonth, endyear, endmonth, counties["harjumaa"],cities["Tallinn"],tlncities[firstcity], tlncities[firstcity])
-            data = get_data(url,driver,False,data,"Tallinn",firstcity,firstcity)
+    url = create_url(startyear, startmonth, endyear, endmonth, counties["harjumaa"],cities["Tallinn"],tlncities[tln])
+    data = get_data(url,driver,data,"Tallinn",tln)
         
-    if indx % 2 == 1:
-        secondcity = tln
-        url = create_url(startyear, startmonth, endyear, endmonth, counties["harjumaa"],cities["Tallinn"],tlncities[firstcity], tlncities[secondcity])
-        if indx ==1: data = get_data(url,driver,True,data,"Tallinn",firstcity,secondcity)
-        else: data = get_data(url,driver,False,data,"Tallinn",firstcity,secondcity)
-    indx += 1
-    for row in data:
-        print(row)
-indx = 0
 for trt in trtcities.keys():
-    if indx % 2 == 0:
-        firstcity = trt
-        
-    if indx % 2 == 1:
-        secondcity = trt
-        url = create_url(startyear, startmonth, endyear, endmonth, counties["tartumaa"],cities["Tartu"],trtcities[firstcity], trtcities[secondcity])
-        data = get_data(url,driver,False,data,"Tartu",firstcity,secondcity)
-    indx += 1
-    for row in data:
-        print(row)
+    url = create_url(startyear, startmonth, endyear, endmonth, counties["tartumaa"],cities["Tartu"],trtcities[trt])
+    data = get_data(url,driver,data,"Tartu",trt)
 driver.close
     
-with open('outs.csv', 'w', newline='') as file:
+with open('data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     for row in data:
         writer.writerow(row)
