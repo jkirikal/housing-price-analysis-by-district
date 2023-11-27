@@ -29,33 +29,17 @@ def get_data(url,driver,previous_data,city,district):
     r = driver.page_source
     soup = BeautifulSoup(r, 'html.parser')
     table = soup.find("table", class_="table-striped")
-    
-    if len(previous_data)<1:
-        data_headers = ["date",f"price-{city}-{district}",f"Advertisements-{city}-{district}",f"Actives-{city}-{district}"]
-        previous_data.append(data_headers)
-        rows = table.find_all('tr')
-        for row in rows:
-            cols = row.find_all('td')
-            cols = [col.text for col in cols]
-            if len(cols)<1: continue
-            previous_data.append(cols)
-        
-    else:
-        data_headers = [f"price-{city}-{district}",f"Advertisements-{city}-{district}",f"Actives-{city}-{district}"]
-        previous_data[0].extend(data_headers)
-        rows = table.find_all('tr')
-        x = False
-        if len(rows) != 199: x = True
-        for row in range(len(rows)):
-            cols = rows[row].find_all('td')
-            cols = [col.text for col in cols]
-            if len(cols)<1: continue
-            try:
-                previous_data[row].extend(cols[1:])
-            except:
-                pass
-        if x:
-            print(url)
+
+    rows = table.find_all('tr')
+    for row in rows:
+        cols = row.find_all('td')
+        cols = [col.text for col in cols]
+        if len(cols)<1: continue
+        date = cols[0].strip("0")
+        toadd = [date,city,district]
+        toadd.extend(cols[1:])
+        previous_data.append(toadd)
+
     return previous_data
 
 counties = {"harjumaa":1,"tartumaa":12}
@@ -73,7 +57,7 @@ secondcity = ""
 
 
 indx = 0
-data = []
+data = [["date","city","district","price", "advertisements","actives"]]
 for tln in tlncities.keys():
     url = create_url(startyear, startmonth, endyear, endmonth, counties["harjumaa"],cities["Tallinn"],tlncities[tln])
     data = get_data(url,driver,data,"Tallinn",tln)
