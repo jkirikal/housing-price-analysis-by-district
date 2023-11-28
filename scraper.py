@@ -35,7 +35,7 @@ def get_data(url,driver,previous_data,city,district):
         cols = row.find_all('td')
         cols = [col.text for col in cols]
         if len(cols)<1: continue
-        date = cols[0].strip("0")
+        date = cols[0].replace(".", "-")
         toadd = [date,city,district]
         toadd.extend(cols[1:])
         previous_data.append(toadd)
@@ -67,7 +67,7 @@ for trt in trtcities.keys():
     data = get_data(url,driver,data,"Tartu",trt)
 driver.close
     
-with open('data.csv', 'w', newline='') as file:
+with open('newdata.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     for row in data:
         writer.writerow(row)
