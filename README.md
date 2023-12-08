@@ -4,3 +4,10 @@
 - Johan Kirikal  
 - Mihkel Jaas Karu
 
+
+
+## Guide:
+
+## Motivation:
+
+## Goal:
