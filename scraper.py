@@ -46,8 +46,8 @@ counties = {"harjumaa":1,"tartumaa":12}
 cities = {"Tallinn":1061,"Tartu":1063}
 startyear = 2007
 endyear = 2023
-startmonth = 5
-endmonth = 11
+startmonth = 1
+endmonth = 12
 tlncities = {"Tallinn":0,"Haabersti":1001,"Kesklinn":1003,"Kristiine":1004,"Lasnamäe":1006,"Mustamäe":1007,"Nõmme":1008,"Pirita":1010,"Põhja-Tallinn":1011,"Vanalinn":5700,"Kadriorg":5701}
 trtcities = {"Tartu":0,"Haage":1334,"Ilmatsalu küla":1530,"Ilmatsalu alevik":1531,"Kandiküla":1857,"Kardla":1887,"Märja":3317,"Pihva":3760,"Rahinge":4058,"Rõhu":4288,"Tartu linn":4820,
              "Tähtvere":5036,"Tüki":5053,"Vorbuse":5515,"Maarjamõisa":5702,"Raadi-Kruusamäe":5703,"Karlova":5704,"Kesklinn":5705,"Ihaste":5706,"Jaamamõisa":5707,"Annelinn":5708,"Veeriku":5709,
@@ -67,7 +67,7 @@ for trt in trtcities.keys():
     data = get_data(url,driver,data,"Tartu",trt)
 driver.close
     
-with open('newdata.csv', 'w', newline='') as file:
+with open('data2007_1-2023_12.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     for row in data:
         writer.writerow(row)
