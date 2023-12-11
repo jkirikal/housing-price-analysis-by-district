@@ -11,6 +11,8 @@ code - We have provided different notebooks that you can access and run
 - scraper.py - the scraper we created to get the data on house price sales by district
 - LSTM_model.ipynb - the model we created to predict the market
 - housing_price_analysis_by_district.ipynb - where all the analysis, graphs and pictures are created
+     * latest version as colab: https://colab.research.google.com/drive/18l8KE3Hqp_xkqSy7PUqK-m2cK_3Cs4zu?usp=sharing
+- housing_price_analysis_by_district.py - ipynb converted to .py file
    
 data - All the data we used in the project
 - /geospatial - all the geospatial maps we used are under there (tallinna_asumid, tartu_asumid)
